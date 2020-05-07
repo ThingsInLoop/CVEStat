@@ -55,7 +55,7 @@ fp.set_preference("permissions.default.script", 2)
 fp.set_preference("javascript.enabled", False)
 o = Options()
 #Опция для запуска движка браузера в фоновом режиме
-#o.headless = True
+o.headless = True
 
 if len(sys.argv) < 2:
     print("vulstat file")
@@ -65,6 +65,11 @@ driver = webdriver.Firefox(firefox_profile=fp, options=o)
 driver.implicitly_wait(15)
 data_file = open(sys.argv[1], 'w')
 
+'''
+    При выключении программы сигналом SIGINT (Ctrl-C)
+     программа попытается нормально закрыть файл записи
+     и движок браузера.
+'''
 def signal_handler(sig, frame):
     global EVERYONE_HAVE_TO_CLOSE
     global data_file
@@ -73,10 +78,14 @@ def signal_handler(sig, frame):
     
     print("\nOkay, no problem")
     EVERYONE_HAVE_TO_CLOSE = 1
+    data_file.close()
+    driver.close()
     sys.exit(0)
 
 
-#Для потока чтения команд
+'''
+    Функция для потока считывания команд
+'''
 def read_requests():
     global EVERYONE_HAVE_TO_CLOSE
     global data_file
@@ -91,6 +100,9 @@ def read_requests():
             sys.exit(0)
 
 
+'''
+    Функция для потока вывода статистики
+'''
 def print_statistics():
     global pgs_nmb
     global global_page
@@ -123,6 +135,10 @@ def print_statistics():
             break
 
 
+'''
+    Подсчет общего количества страниц для
+     сканирования
+'''
 def pages_total_number():
     global page_amount
 
@@ -139,6 +155,10 @@ def pages_total_number():
     return sum(page_amount)
 
 
+'''
+    Получение дополнительной информации о
+     уязвимости
+'''
 def get_vuln_data(data):
     out = ""
     data_els = data.find_elements_by_tag_name("td")
@@ -230,17 +250,23 @@ if __name__ == '__main__':
     stt_t = threading.Thread(target=print_statistics)
     stt_t.start()
 
-    #Поток чтения команд
+    #Инициализация потока чтения команд
     req_t = threading.Thread(target=read_requests)
     req_t.start()
 
+    #Подсчет общего количества проверяемых страниц
     pgs_nmb = pages_total_number()
 
+    #Установка статистики в режим вывода основной информации
     stats_state = STAT_PROCESSING
 
+    #Парсинг всех страниц
     main_processing()
 
+    #Установка статистики в режим окончания работы
+    # Необходимо для закрытия потока
     stats_state = STAT_STOPPED
 
+    #Закрытие всего, что закрывается
     data_file.close()
     driver.close()
