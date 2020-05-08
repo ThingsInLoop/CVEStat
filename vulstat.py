@@ -256,16 +256,19 @@ if __name__ == '__main__':
 
     #Подсчет общего количества проверяемых страниц
     pgs_nmb = pages_total_number()
+    stats_state = STAT_STOPPED
+    time.sleep(1)
+    print(pgs_nmb)
 
     #Установка статистики в режим вывода основной информации
-    stats_state = STAT_PROCESSING
+    #stats_state = STAT_PROCESSING
 
     #Парсинг всех страниц
-    main_processing()
+    #main_processing()
 
     #Установка статистики в режим окончания работы
     # Необходимо для закрытия потока
-    stats_state = STAT_STOPPED
+    #stats_state = STAT_STOPPED
 
     #Закрытие всего, что закрывается
     data_file.close()
