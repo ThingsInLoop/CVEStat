@@ -4,14 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../cve_details.c \
 ../search_functions.c \
 ../vulstat.c 
 
 OBJS += \
+./cve_details.o \
 ./search_functions.o \
 ./vulstat.o 
 
 C_DEPS += \
+./cve_details.d \
 ./search_functions.d \
 ./vulstat.d 
 
