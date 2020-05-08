@@ -1,7 +1,10 @@
 !/Debug/makefile
 !/Debug/*.mk
 /Debug/
-./stat*
-./geckodriver.log
-./vulstat.py
-./StatTable
+stat*
+geckodriver.log
+vulstat.py
+StatTable.ods
+.settings/
+.cproject
+.project
