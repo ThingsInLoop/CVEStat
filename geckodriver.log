@@ -899,3 +899,13 @@ Exiting due to channel error.
 1588876454805	Marionette	INFO	Listening on port 36039
 1588876454849	Marionette	WARN	TLS certificate errors will be ignored for this session
 1588876495724	Marionette	INFO	Stopped listening on port 36039
+1588897562562	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-headless" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileTKRV4G"
+*** You are running in headless mode.
+1588897562820	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1588897562839	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1588897562839	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1588897562840	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1588897562840	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1588897563962	Marionette	INFO	Listening on port 33801
+1588897563973	Marionette	WARN	TLS certificate errors will be ignored for this session
+1588897570784	Marionette	INFO	Stopped listening on port 33801

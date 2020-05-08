@@ -14,7 +14,11 @@ struct search_body* sb_padding = NULL;
 struct search_body* sb_end = NULL;
 
 struct search_body* sb_searcht = NULL;
-struct search_body* sb_prots = NULL;
+struct search_body* sb_L7 = NULL;
+struct search_body* sb_L5 = NULL;
+struct search_body* sb_L4 = NULL;
+struct search_body* sb_L3 = NULL;
+struct search_body* sb_L2 = NULL;
 
 struct descriptor descrs[MAX_PARALLEL];
 struct all_pages* page_ptr = NULL;
@@ -22,6 +26,10 @@ struct all_pages* page_ptr = NULL;
 static int fp = 0;
 
 static unsigned int is_l7 = 0;
+static unsigned int is_l5 = 0;
+static unsigned int is_l4 = 0;
+static unsigned int is_l3 = 0;
+static unsigned int is_l2 = 0;
 static unsigned int is_other = 0;
 
 static unsigned char stats_state = 0;
@@ -203,29 +211,42 @@ int page_event(char* word, char* next, char* last)
 		text = strchr(text, '>') + 1;
 		text_end = strstr(text, "</td>");
 
-		if (sf_find_left(sb_prots, text, text_end - text)){
+		if (sf_find_left(sb_L7, text, text_end - text)){
 			is_l7++;
 			str_len += strlen(L7_PREFIX) + 1 + (cve_name_end - cve_name + 1) + (cve_class_end - cve_class + 1) +
 					(cve_date_end - cve_date + 1) + (cve_score_end - cve_score + 1);
 			new_data = (char*)malloc(sizeof(char) * str_len);
 			strcpy(new_data, L7_PREFIX";");
 			cur_len = strlen(new_data);
-			memcpy(new_data + cur_len, cve_name, cve_name_end - cve_name);
-			cur_len += cve_name_end - cve_name;
-			new_data[cur_len++] = ';';
-			memcpy(new_data + cur_len, cve_class, cve_class_end - cve_class);
-			cur_len += cve_class_end - cve_class;
-			new_data[cur_len++] = ';';
-			memcpy(new_data + cur_len, cve_date, cve_date_end - cve_date);
-			cur_len += cve_date_end - cve_date;
-			new_data[cur_len++] = ';';
-			memcpy(new_data + cur_len, cve_score, cve_score_end - cve_score);
-			cur_len += cve_score_end - cve_score;
-			new_data[cur_len++] ='\n';
-			if (write(fp, new_data, cur_len) == -1)
-				fprintf(stderr, "Didnt write somewhat");
 
-			free(new_data);
+		} else if (sf_find_left(sb_L5, text, text_end - text)){
+			is_l5++;
+			str_len += strlen(L5_PREFIX) + 1 + (cve_name_end - cve_name + 1) + (cve_class_end - cve_class + 1) +
+					(cve_date_end - cve_date + 1) + (cve_score_end - cve_score + 1);
+			new_data = (char*)malloc(sizeof(char) * str_len);
+			strcpy(new_data, L5_PREFIX";");
+			cur_len = strlen(new_data);
+		} else if (sf_find_left(sb_L4, text, text_end - text)){
+			is_l4++;
+			str_len += strlen(L4_PREFIX) + 1 + (cve_name_end - cve_name + 1) + (cve_class_end - cve_class + 1) +
+					(cve_date_end - cve_date + 1) + (cve_score_end - cve_score + 1);
+			new_data = (char*)malloc(sizeof(char) * str_len);
+			strcpy(new_data, L4_PREFIX";");
+			cur_len = strlen(new_data);
+		} else if (sf_find_left(sb_L3, text, text_end - text)){
+			is_l3++;
+			str_len += strlen(L3_PREFIX) + 1 + (cve_name_end - cve_name + 1) + (cve_class_end - cve_class + 1) +
+					(cve_date_end - cve_date + 1) + (cve_score_end - cve_score + 1);
+			new_data = (char*)malloc(sizeof(char) * str_len);
+			strcpy(new_data, L3_PREFIX";");
+			cur_len = strlen(new_data);
+		} else if (sf_find_left(sb_L2, text, text_end - text)){
+			is_l2++;
+			str_len += strlen(L2_PREFIX) + 1 + (cve_name_end - cve_name + 1) + (cve_class_end - cve_class + 1) +
+					(cve_date_end - cve_date + 1) + (cve_score_end - cve_score + 1);
+			new_data = (char*)malloc(sizeof(char) * str_len);
+			strcpy(new_data, L2_PREFIX";");
+			cur_len = strlen(new_data);
 		} else {
 			is_other++;
 			str_len += strlen(OTHER_PREFIX) + 1 + (cve_name_end - cve_name + 1) + (cve_class_end - cve_class + 1) +
@@ -233,22 +254,23 @@ int page_event(char* word, char* next, char* last)
 			new_data = (char*)malloc(sizeof(char) * str_len);
 			strcpy(new_data, OTHER_PREFIX";");
 			cur_len = strlen(new_data);
-			memcpy(new_data + cur_len, cve_name, cve_name_end - cve_name);
-			cur_len += cve_name_end - cve_name;
-			new_data[cur_len++] = ';';
-			memcpy(new_data + cur_len, cve_class, cve_class_end - cve_class);
-			cur_len += cve_class_end - cve_class;
-			new_data[cur_len++] = ';';
-			memcpy(new_data + cur_len, cve_date, cve_date_end - cve_date);
-			cur_len += cve_date_end - cve_date;
-			new_data[cur_len++] = ';';
-			memcpy(new_data + cur_len, cve_score, cve_score_end - cve_score);
-			cur_len += cve_score_end - cve_score;
-			new_data[cur_len++] ='\n';
-			if (write(fp, new_data, cur_len) == -1)
-				fprintf(stderr, "Didnt write somewhat");
-			free(new_data);
 		}
+		memcpy(new_data + cur_len, cve_name, cve_name_end - cve_name);
+		cur_len += cve_name_end - cve_name;
+		new_data[cur_len++] = ';';
+		memcpy(new_data + cur_len, cve_class, cve_class_end - cve_class);
+		cur_len += cve_class_end - cve_class;
+		new_data[cur_len++] = ';';
+		memcpy(new_data + cur_len, cve_date, cve_date_end - cve_date);
+		cur_len += cve_date_end - cve_date;
+		new_data[cur_len++] = ';';
+		memcpy(new_data + cur_len, cve_score, cve_score_end - cve_score);
+		cur_len += cve_score_end - cve_score;
+		new_data[cur_len++] ='\n';
+		if (write(fp, new_data, cur_len) == -1)
+			fprintf(stderr, "Didnt write somewhat");
+
+		free(new_data);
 	}
 
 	return 0;
@@ -287,7 +309,11 @@ int main_processing(char* file_name)
 	  static int pg_c = 0;
 
 	  sb_searcht = sf_init_sb(SEARCHT_START"|"SEARCHT_END"|"SEARCHT_DATA);
-	  sb_prots = sf_init_sb((char*)L7_NAMES);
+	  sb_L7 = sf_init_sb((char*)L7_NAMES);
+	  sb_L5 = sf_init_sb((char*)L5_NAMES);
+	  sb_L4 = sf_init_sb((char*)L4_NAMES);
+	  sb_L3 = sf_init_sb((char*)L3_NAMES);
+	  sb_L2 = sf_init_sb((char*)L2_NAMES);
 
 	  fp = open(file_name, O_CREAT | O_WRONLY | O_TRUNC, 666);
 	  if (fp == -1)
@@ -413,9 +439,9 @@ void *print_statistics()
 				}
 			}
 			printf("]\n");
-			printf("L7: %d; Others: %d\n", is_l7, is_other);
+			printf("\tL7: %d\n\tL5: %d\n\tL4: %d\n\tL3: %d\n\tL2: %d\n\tOthers: %d\n", is_l7, is_l5, is_l4, is_l3, is_l2, is_other);
 		} else if (stats_state == STAT_STOPPED){
-			printf("L7: %d; Others: %d\n", is_l7, is_other);
+			printf("\tL7: %d\n\tL5: %d\n\tL4: %d\n\tL3: %d\n\tL2: %d\n\tOthers: %d\n", is_l7, is_l5, is_l4, is_l3, is_l2, is_other);
 			pthread_exit(0);
 			break;
 		}
