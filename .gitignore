@@ -5,6 +5,6 @@ stat*
 geckodriver.log
 vulstat.py
 StatTable.ods
-.settings/
+/.settings/
 .cproject
 .project
