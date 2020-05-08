@@ -1,1 +1,7 @@
+!/Debug/makefile
+!/Debug/*.mk
 /Debug/
+./stat*
+./geckodriver.log
+./vulstat.py
+./StatTable
