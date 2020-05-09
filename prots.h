@@ -25,6 +25,7 @@ static const char*
 L2_NAMES =		"Attached|ATM|CDP|DCAP|DTP|Econet|FDDI|Frame|CCITT|HDLC|802.11|WiFi|802.16|LocalTalk|L2F|L2TP|LAPD|LLDP|LLDP-MED|PPP|PPTP|Q.710|NDP|RPR|Shortest|SLIP|StarLAN|"
 		"STP|Token|VTP|ATM|Frame|MPLS|X.25|ARP|RARP|ARCNET|Ethernet";
 
+
 #ifndef MKBYTES_
 #define MKBYTES_
 #define KB							(1024)

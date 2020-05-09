@@ -9,25 +9,25 @@
 #include "search_functions.h"
 #include "prots.h"
 
-struct search_body* cved_sb_padding = NULL;
-struct search_body* cved_sb_end = NULL;
-struct search_body* cved_sb_searcht = NULL;
+static struct search_body* cved_sb_padding = NULL;
+static struct search_body* cved_sb_end = NULL;
+static struct search_body* cved_sb_searcht = NULL;
 
-struct search_body* cved_sb_L7 = NULL;
-struct search_body* cved_sb_L5 = NULL;
-struct search_body* cved_sb_L4 = NULL;
-struct search_body* cved_sb_L3 = NULL;
-struct search_body* cved_sb_L2 = NULL;
+static struct search_body* cved_sb_L7 = NULL;
+static struct search_body* cved_sb_L5 = NULL;
+static struct search_body* cved_sb_L4 = NULL;
+static struct search_body* cved_sb_L3 = NULL;
+static struct search_body* cved_sb_L2 = NULL;
 
-struct descriptor cved_descrs[MAX_PARALLEL];
-struct all_pages* cved_page_ptr = NULL;
+static struct descriptor cved_descrs[MAX_PARALLEL];
+static struct all_pages* cved_page_ptr = NULL;
 
-struct processing_stat cved_stat;
+static struct processing_stat cved_stat;
 
-int cved_fp = 0;
+static int cved_fp = 0;
 
-unsigned int cved_total_pages_nmb = 0;
-unsigned int cved_current_page_nmb = 0;
+static unsigned int cved_total_pages_nmb = 0;
+static unsigned int cved_current_page_nmb = 0;
 
 
 static const char*
@@ -92,7 +92,9 @@ static size_t cved_write_preparation_data(char *data, size_t n, size_t l, void *
 	}
 
 	if (sf_find_left(cved_sb_end, data, l)){
-		sf_call_event_handler(cved_sb_padding, descr->data, descr->index, cved_page_preparation_event);
+		if (sf_call_event_handler(cved_sb_padding, descr->data, descr->index, cved_page_preparation_event)){
+			cved_stat.is_error++;
+		}
 		descr->index = 0;
 		descr->in_use = 0;
 	}
@@ -175,11 +177,12 @@ unsigned int cved_preparations ()
 	  } while(still_alive || (transfers < CVE_DETAILS_PAGES_NMB));
 
 	  curl_multi_cleanup(cm);
-	  curl_global_cleanup();
 
 	  for (i = 0; i < MAX_PARALLEL; i++){
 		  free(cved_descrs[i].data);
 	  }
+	  sf_free_sb(cved_sb_end);
+	  sf_free_sb(cved_sb_padding);
 
 	  return cved_total_pages_nmb;
 }
@@ -306,7 +309,9 @@ static size_t cved_write_data(char *data, size_t n, size_t l, void *userp)
 
 	if (sf_find_left(cved_sb_end, data, l)){
 		cved_current_page_nmb++;
-		sf_call_event_handler(cved_sb_searcht, descr->data, descr->index, cved_page_event);
+		if (sf_call_event_handler(cved_sb_searcht, descr->data, descr->index, cved_page_event)){
+			cved_stat.is_error++;
+		}
 		descr->index = 0;
 		descr->in_use = 0;
 	}
@@ -314,7 +319,7 @@ static size_t cved_write_data(char *data, size_t n, size_t l, void *userp)
 	return n*l;
 }
 
-int cved_main_processing(int write_file, struct processing_stat* statistics, unsigned int* current_page)
+int cved_main_processing(int write_file, struct processing_stat* stats, unsigned int* current_page)
 {
 	  CURLM *cm;
 	  CURLMsg *msg;
@@ -323,6 +328,9 @@ int cved_main_processing(int write_file, struct processing_stat* statistics, uns
 	  unsigned int transfers = 0;
 	  int j = 0;
 	  int i = 0;
+
+	  if (!cved_page_ptr)
+		  return -1;
 
 	  memset(&cved_descrs, 0, sizeof(struct descriptor) * MAX_PARALLEL);
 	  for (i = 0; i < MAX_PARALLEL; i++){
@@ -333,6 +341,7 @@ int cved_main_processing(int write_file, struct processing_stat* statistics, uns
 	  cved_fp = write_file;
 
 	  cved_sb_searcht = sf_init_sb(SEARCHT_START"|"SEARCHT_END"|"SEARCHT_DATA);
+	  cved_sb_end = sf_init_sb(HTML_END);
 	  cved_sb_L7 = sf_init_sb((char*)L7_NAMES);
 	  cved_sb_L5 = sf_init_sb((char*)L5_NAMES);
 	  cved_sb_L4 = sf_init_sb((char*)L4_NAMES);
@@ -368,27 +377,54 @@ int cved_main_processing(int write_file, struct processing_stat* statistics, uns
 	            CURL *e = msg->easy_handle;
 	    		curl_multi_remove_handle(cm, e);
 	    		curl_easy_cleanup(e);
-	    		*current_page = cved_current_page_nmb;
-	    		memcpy(statistics, &cved_stat, sizeof(struct processing_stat));
+	    		(*current_page)++;
+	    		if (cved_stat.is_l2){
+	    			stats->is_l2 += cved_stat.is_l2;
+	    			cved_stat.is_l2 = 0;
+	    		}
+	    		if (cved_stat.is_l3){
+	    			stats->is_l3 += cved_stat.is_l3;
+	    			cved_stat.is_l3 = 0;
+	    		}
+	    		if (cved_stat.is_l4){
+	    			stats->is_l4 += cved_stat.is_l4;
+	    			cved_stat.is_l4 = 0;
+	    		}
+	    		if (cved_stat.is_l5){
+	    			stats->is_l5 += cved_stat.is_l5;
+	    			cved_stat.is_l5 = 0;
+	    		}
+	    		if (cved_stat.is_l7){
+	    			stats->is_l7 += cved_stat.is_l7;
+	    			cved_stat.is_l7 = 0;
+	    		}
+	    		if (cved_stat.is_other){
+	    			stats->is_other += cved_stat.is_other;
+	    			cved_stat.is_other = 0;
+	    		}
+	    		if (cved_stat.is_error){
+	    			stats->is_error += cved_stat.is_error;
+	    			cved_stat.is_error = 0;
+	    		}
+		    	if (cved_page_ptr){
+		  		  e = curl_easy_init();
+		  		  curl_easy_setopt(e, CURLOPT_WRITEFUNCTION, cved_write_data);
+		  		  for (j = 0; j < MAX_PARALLEL; j++){
+		  			  if (!cved_descrs[j].in_use){
+		  				  cved_descrs[j].index = 0;
+		  				  cved_descrs[j].in_use = 1;
+		  				  curl_easy_setopt(e, CURLOPT_WRITEDATA, cved_descrs + j);
+		  				  break;
+		  			  }
+		  		  }
+		  		  curl_easy_setopt(e, CURLOPT_URL, cved_page_ptr->url);
+		  		  curl_easy_setopt(e, CURLOPT_PRIVATE, cved_page_ptr->url);
+		  		  curl_multi_add_handle(cm, e);
+		  		  cved_page_ptr = cved_page_ptr->next;
+		    	}
 	    	}
 	    	else {
 	    		fprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
-	    	}
-	    	if (cved_page_ptr){
-	  		  CURL *eh = curl_easy_init();
-	  		  curl_easy_setopt(eh, CURLOPT_WRITEFUNCTION, cved_write_data);
-	  		  for (j = 0; j < MAX_PARALLEL; j++){
-	  			  if (!cved_descrs[j].in_use){
-	  				  cved_descrs[j].index = 0;
-	  				  cved_descrs[j].in_use = 1;
-	  				  curl_easy_setopt(eh, CURLOPT_WRITEDATA, cved_descrs + j);
-	  				  break;
-	  			  }
-	  		  }
-	  		  curl_easy_setopt(eh, CURLOPT_URL, cved_page_ptr->url);
-	  		  curl_easy_setopt(eh, CURLOPT_PRIVATE, cved_page_ptr->url);
-	  		  curl_multi_add_handle(cm, eh);
-	  		  cved_page_ptr = cved_page_ptr->next;
 	    	}
 	    }
 	    if(still_alive)
@@ -397,11 +433,17 @@ int cved_main_processing(int write_file, struct processing_stat* statistics, uns
 	  } while(still_alive || cved_page_ptr);
 
 	  curl_multi_cleanup(cm);
-	  curl_global_cleanup();
 
 	  for (i = 0; i < MAX_PARALLEL; i++){
 		 free(cved_descrs[i].data);
 	  }
+	  sf_free_sb(cved_sb_searcht);
+	  sf_free_sb(cved_sb_end);
+	  sf_free_sb(cved_sb_L7);
+	  sf_free_sb(cved_sb_L5);
+	  sf_free_sb(cved_sb_L4);
+	  sf_free_sb(cved_sb_L3);
+	  sf_free_sb(cved_sb_L2);
 
 	return 0;
 }

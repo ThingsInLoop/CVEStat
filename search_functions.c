@@ -200,6 +200,7 @@ int sf_call_event_handler (struct search_body* sb, char* haystack, unsigned int 
 {
 	unsigned int i;
 	struct hash_el* tmp;
+	unsigned char found= 0;
 
 	if (len < 2)
 		return 0;
@@ -207,6 +208,7 @@ int sf_call_event_handler (struct search_body* sb, char* haystack, unsigned int 
 	for (i = sb->word_min_len - 2; i < len; i += sb->word_min_len - 1){
 		for (tmp = sb->table[*((unsigned short*)(haystack + i))]; tmp; tmp = tmp->next){
 			if (tmp->index <= i && !memcmp(tmp->word, haystack + i - tmp->index, tmp->word_len)){
+				found = 1;
 				if (eventHandler(tmp->word, haystack + i - tmp->index + tmp->word_len, haystack + len)){
 					return 0;
 				}
@@ -217,9 +219,14 @@ int sf_call_event_handler (struct search_body* sb, char* haystack, unsigned int 
 	i = len - 2;
 	if ((tmp = sb->table[*((unsigned short*)(haystack + i))])){
 		if (tmp->index <= i && !memcmp(tmp->word, haystack + i - tmp->index, tmp->word_len)){
+			found = 1;
 			eventHandler(tmp->word, haystack + i - tmp->index + tmp->word_len, haystack + len);
 		}
 	}
 
-	return 0;
+	if (found){
+		return 0;
+	} else {
+		return -1;
+	}
 }

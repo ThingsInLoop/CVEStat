@@ -10,8 +10,8 @@
 static unsigned int total_pages_nmb = 0;
 static unsigned int current_page_nmb = 0;
 
-static int cved_fp = 0;
-//static int fstek_fp = 0;
+static int cved_fp_write = 0;
+static int fstek_fp_write = 0;
 
 static struct processing_stat statistics;
 
@@ -24,14 +24,20 @@ int main(int argc, char* argv[])
 {
 	pthread_t stt_t;
 
-	if (argc < 2){
-		printf("vulstat cved_file\n");
+	if (argc < 3){
+		printf("vulstat cved_file fstek_file\n");
 	}
 
-	if ((cved_fp = open(argv[1], O_CREAT | O_WRONLY | O_TRUNC, 666)) == -1){
+	if ((cved_fp_write = open(argv[1], O_CREAT | O_WRONLY | O_TRUNC, 666)) == -1){
 		fprintf(stderr, "Cannot open cved file!\n");
 		return -1;
 	}
+	if ((fstek_fp_write = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 666)) == -1){
+		fprintf(stderr, "Cannot open fstek file!\n");
+		return -1;
+	}
+
+	memset(&statistics, 0, sizeof(struct processing_stat));
 
 	start_time = time(NULL);
 	stats_state = STAT_PREPARATION;
@@ -39,13 +45,17 @@ int main(int argc, char* argv[])
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	total_pages_nmb += cved_preparations();
+	total_pages_nmb += fstek_preparations();
 
 	stats_state = STAT_PROCESSING;
-	cved_main_processing(cved_fp, &statistics, &current_page_nmb);
 
-	close(cved_fp);
+	fstek_main_processing(fstek_fp_write, &statistics, &current_page_nmb);
+	close(fstek_fp_write);
 
-	stats_state = STAT_STOPPED;
+	cved_main_processing(cved_fp_write, &statistics, &current_page_nmb);
+	close(cved_fp_write);
+
+	curl_global_cleanup();
 	printf("Done\n");
 
 	return 0;
@@ -78,11 +88,11 @@ void *print_statistics()
 				}
 			}
 			printf("]\n");
-			printf("\tL7: %d\n\tL5: %d\n\tL4: %d\n\tL3: %d\n\tL2: %d\n\tOthers: %d\n",
-					statistics.is_l7, statistics.is_l5, statistics.is_l4, statistics.is_l3, statistics.is_l2, statistics.is_other);
+			printf("\tL7: %d\n\tL5: %d\n\tL4: %d\n\tL3: %d\n\tL2: %d\n\tOthers: %d\n\tErrors: %d\n",
+					statistics.is_l7, statistics.is_l5, statistics.is_l4, statistics.is_l3, statistics.is_l2, statistics.is_other, statistics.is_error);
 		} else if (stats_state == STAT_STOPPED){
-			printf("\tL7: %d\n\tL5: %d\n\tL4: %d\n\tL3: %d\n\tL2: %d\n\tOthers: %d\n",
-					statistics.is_l7, statistics.is_l5, statistics.is_l4, statistics.is_l3, statistics.is_l2, statistics.is_other);
+			printf("\tL7: %d\n\tL5: %d\n\tL4: %d\n\tL3: %d\n\tL2: %d\n\tOthers: %d\n\tErrors: %d\n",
+					statistics.is_l7, statistics.is_l5, statistics.is_l4, statistics.is_l3, statistics.is_l2, statistics.is_other, statistics.is_error);
 			pthread_exit(0);
 			break;
 		}

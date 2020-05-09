@@ -1,12 +1,12 @@
 /*
- * cve_details.h
+ * fstek.h
  *
  *  Created on: May 8, 2020
  *      Author: sasha
  */
 
-#ifndef CVE_DETAILS_H_
-#define CVE_DETAILS_H_
+#ifndef FSTEK_H_
+#define FSTEK_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,23 +48,24 @@ struct processing_stat {
 };
 #endif
 
-#define MAX_PARALLEL				16
-
-#define URL_START					"https://www.cvedetails.com"
-#define CVE_DETAILS_PAGES_NMB		(sizeof(CVE_DETAILS_PAGES) / sizeof(char*))
+#define FSTEK_MAX_PARALLEL			16
+#define BDU_PAGE_PREFIX				"https://bdu.fstec.ru/vul?ajax=vuls&size=100&page="
+#define FSTEK_PAGES_NMB				(sizeof(FSTEK_PAGES) / sizeof(char*))
 
 #define HTML_END					"</html>"
-#define PADDING_START				"id=\"pagingb\""
-#define PADDING_END					"id=\"footer"
-#define PADDING_PAGE_ADDR_START		"href=\""
-#define PADDING_PAGE_ADDR_END		"title=\"Go to page"
 
-#define SEARCHT_START				"vulnslisttable"
-#define SEARCHT_END					"pagingb"
-#define SEARCHT_DATA				"srrowns"
-#define SEARCHT_TEXT				"cvesummarylong"
+#define FSTEK_SEARCHT_START			"table table-striped table-vuls"
+#define FSTEK_SEARCHT_END			"link-pager"
+#define FSTEK_SEARCHT_DATA			"<tr>"
 
-int					cved_main_processing			(int , struct processing_stat* , unsigned int* );
-unsigned int		cved_preparations				();
+#define SCORE_LOW					"bsc bsc-low"
+#define SCORE_MIDDLE				"bsc bsc-middle"
+#define SCORE_HIGH					"bsc bsc-high"
+#define SCORE_CRITICAL				"bsc bsc-critical"
 
-#endif /* CVE_DETAILS_H_ */
+#define DESCRIPTORS_SIZE			(10 * MB)
+
+int					fstek_main_processing			(int , struct processing_stat* , unsigned int* );
+unsigned int		fstek_preparations				();
+
+#endif /* FSTEK_H_ */

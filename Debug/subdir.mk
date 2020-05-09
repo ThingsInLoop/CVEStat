@@ -5,16 +5,19 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../cve_details.c \
+../fstek.c \
 ../search_functions.c \
 ../vulstat.c 
 
 OBJS += \
 ./cve_details.o \
+./fstek.o \
 ./search_functions.o \
 ./vulstat.o 
 
 C_DEPS += \
 ./cve_details.d \
+./fstek.d \
 ./search_functions.d \
 ./vulstat.d 
 

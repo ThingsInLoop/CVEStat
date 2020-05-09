@@ -19,6 +19,7 @@
 #include <curl/curl.h>
 
 #include "cve_details.h"
+#include "fstek.h"
 
 #define STAT_PREPARATION			1
 #define STAT_PROCESSING				2
