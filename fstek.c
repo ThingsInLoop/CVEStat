@@ -368,10 +368,12 @@ int fstek_main_processing(int write_file, struct processing_stat* stats, unsigne
 		  				  break;
 		  			  }
 		  		  }
-		  		  curl_easy_setopt(e, CURLOPT_URL, fstek_page_ptr->url);
-		  		  curl_easy_setopt(e, CURLOPT_PRIVATE, fstek_page_ptr->url);
-		  		  curl_multi_add_handle(cm, e);
-		  		  fstek_page_ptr = fstek_page_ptr->next;
+		  		  if (j != FSTEK_MAX_PARALLEL){
+					  curl_easy_setopt(e, CURLOPT_URL, fstek_page_ptr->url);
+					  curl_easy_setopt(e, CURLOPT_PRIVATE, fstek_page_ptr->url);
+					  curl_multi_add_handle(cm, e);
+					  fstek_page_ptr = fstek_page_ptr->next;
+		  		  }
 		    	}
 	    	}
 	    	else {

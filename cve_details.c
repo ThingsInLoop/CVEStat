@@ -417,10 +417,12 @@ int cved_main_processing(int write_file, struct processing_stat* stats, unsigned
 		  				  break;
 		  			  }
 		  		  }
-		  		  curl_easy_setopt(e, CURLOPT_URL, cved_page_ptr->url);
-		  		  curl_easy_setopt(e, CURLOPT_PRIVATE, cved_page_ptr->url);
-		  		  curl_multi_add_handle(cm, e);
-		  		  cved_page_ptr = cved_page_ptr->next;
+		  		  if (j != MAX_PARALLEL){
+					  curl_easy_setopt(e, CURLOPT_URL, cved_page_ptr->url);
+					  curl_easy_setopt(e, CURLOPT_PRIVATE, cved_page_ptr->url);
+					  curl_multi_add_handle(cm, e);
+					  cved_page_ptr = cved_page_ptr->next;
+		  		  }
 		    	}
 	    	}
 	    	else {

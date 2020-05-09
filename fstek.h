@@ -48,9 +48,8 @@ struct processing_stat {
 };
 #endif
 
-#define FSTEK_MAX_PARALLEL			16
+#define FSTEK_MAX_PARALLEL			8
 #define BDU_PAGE_PREFIX				"https://bdu.fstec.ru/vul?ajax=vuls&size=100&page="
-#define FSTEK_PAGES_NMB				(sizeof(FSTEK_PAGES) / sizeof(char*))
 
 #define HTML_END					"</html>"
 
